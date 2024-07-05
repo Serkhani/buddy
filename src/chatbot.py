@@ -12,12 +12,12 @@ from langchain_core.prompts import PromptTemplate
 # from langchain_core.prompts import ChatPromptTemplate
 
 try:
-    vectorstore = PineconeVectorStore(
+    st.session_state.vectorstore = PineconeVectorStore(
         embedding=OpenAIEmbeddings(api_key=st.secrets["OPENAI_API_KEY"]),
         distance_strategy=DistanceStrategy.EUCLIDEAN_DISTANCE,
         index_name=st.secrets["PINECONE_INDEX_NAME"],
     )
-    llm:ChatOpenAI = ChatOpenAI(
+    st.session_state.llm = ChatOpenAI(
         openai_api_key=st.secrets['OPENAI_API_KEY'],
         model_name='gpt-3.5-turbo',
         streaming=True,
@@ -72,14 +72,14 @@ try:
 )
 
     # preprompt = prepromtTemplate | llm | StrOutputParser()
-    memory:ConversationBufferMemory = ConversationBufferMemory(
+    st.session_state.memory = ConversationBufferMemory(
             output_key="answer",
             memory_key='chat_history', 
             return_messages=True)
     conversation_chain = ConversationalRetrievalChain.from_llm(
-            llm=llm,
-            retriever=vectorstore.as_retriever(),
-            memory=memory,
+            llm=st.session_state.llm,
+            retriever=st.session_state.vectorstore.as_retriever(),
+            memory=st.session_state.memory,
             return_source_documents=True,
             verbose=True,
              output_key='answer',
